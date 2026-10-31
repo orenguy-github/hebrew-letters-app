@@ -249,6 +249,7 @@ let listeningIndex = 0;
 let listeningScore = 0;
 let listeningActive = false;
 let shuffledListening = [];
+let currentAudio = null;
 
 function loadVoices() {
   const voices = synth.getVoices();
@@ -265,6 +266,14 @@ if (synth.onvoiceschanged !== undefined) {
 loadVoices();
 
 function speak(text) {
+  // Stop any previous audio
+  if (currentAudio) {
+    currentAudio.pause();
+    currentAudio.currentTime = 0;
+    currentAudio = null;
+  }
+  if (synth.speaking) synth.cancel();
+
   // Map Hebrew name to filename
   const nameMap = {
     'אלף': 'alef', 'בית': 'bet', 'גימל': 'gimel', 'דלת': 'dalet',
@@ -276,9 +285,9 @@ function speak(text) {
   };
   const filename = nameMap[text];
   if (filename) {
-    const audio = new Audio(`audio/letters/${filename}.mp3`);
-    audio.play().catch(() => {
-      // Fallback to TTS if audio fails
+    currentAudio = new Audio(`audio/letters/${filename}.mp3`);
+    currentAudio.play().catch(() => {
+      currentAudio = null;
       fallbackSpeak(text);
     });
     return;
@@ -302,8 +311,12 @@ function playFullAudio() {
 }
 
 function stopSpeaking() {
+  if (currentAudio) {
+    currentAudio.pause();
+    currentAudio.currentTime = 0;
+    currentAudio = null;
+  }
   if (synth.speaking) synth.cancel();
-  // Stop any HTML5 audio if needed
   document.querySelectorAll('audio').forEach(a => a.pause());
 }
 
