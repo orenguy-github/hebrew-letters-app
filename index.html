@@ -72,13 +72,47 @@
   .tab-btn.active { background: var(--primary); color: white; }
   .tab-content { display: none; }
   .tab-content.active { display: block; }
-  .letters-grid, .memory-grid, .listening-grid {
+  .letters-grid, .listening-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
     gap: 15px;
     margin-top: 15px;
   }
-  .letter-card, .memory-card, .listen-card {
+  .memory-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+    gap: 10px;
+    margin-top: 15px;
+  }
+  .memory-card {
+    background: var(--primary);
+    color: white;
+    border-radius: 12px;
+    padding: 12px 6px;
+    text-align: center;
+    font-size: 1.8em;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: var(--shadow);
+    transition: all 0.3s;
+    user-select: none;
+    min-height: 75px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  @media (max-width: 600px) {
+    .memory-grid {
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+    .memory-card {
+      font-size: 1.6em;
+      min-height: 65px;
+      padding: 10px 4px;
+    }
+  }
+  .letter-card, .listen-card {
     background: var(--card-bg);
     border-radius: 15px;
     padding: 18px 10px;
