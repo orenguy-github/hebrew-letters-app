@@ -141,7 +141,7 @@
 <div class="container">
   <header>
     <h1>אותיות האלפבית העברי</h1>
-    <p class="subtitle">לימוד דפוס + כתב | משחקי זיכרון ושמיעה</p>
+    <p class="subtitle">לימוד דפוס + כתב | משחקי זיכרון, שמיעה ותמונות</p>
   </header>
 
   <div class="style-toggle">
@@ -153,6 +153,7 @@
     <button class="tab-btn active" onclick="showTab('learn')">לימוד אותיות</button>
     <button class="tab-btn" onclick="showTab('memory')">משחק זיכרון</button>
     <button class="tab-btn" onclick="showTab('listening')">משחק שמיעה</button>
+    <button class="tab-btn" onclick="showTab('picture')">אות פותחת (תמונה)</button>
   </div>
 
   <div id="learn" class="tab-content active">
@@ -184,6 +185,19 @@
       <div class="score" id="listeningScore">ניקוד: 0</div>
     </div>
     <div class="listening-grid" id="listeningGrid"></div>
+  </div>
+
+  <div id="picture" class="tab-content">
+    <div class="controls">
+      <button onclick="startPictureGame()">התחל משחק תמונות</button>
+      <button class="secondary" onclick="nextPicture()">תמונה הבאה</button>
+    </div>
+    <div class="status">
+      <div class="current-sound" id="pictureWord">לחץ על "התחל משחק תמונות"</div>
+      <div class="score" id="pictureScore">ניקוד: 0</div>
+    </div>
+    <div id="pictureDisplay" style="font-size: 8em; text-align: center; margin: 20px 0;">🍎</div>
+    <div class="listening-grid" id="pictureOptions"></div>
   </div>
 
   <div class="note">
@@ -494,6 +508,99 @@ function nextListening() {
       c.style.pointerEvents = 'auto';
     });
     playCurrentListening();
+  }
+}
+
+// Picture game (opening letter)
+const pictureItems = [
+  { emoji: '🍎', word: 'תפוח', letter: 'ת' },
+  { emoji: '🍌', word: 'בננה', letter: 'ב' },
+  { emoji: '🐶', word: 'כלב', letter: 'כ' },
+  { emoji: '🐱', word: 'חתול', letter: 'ח' },
+  { emoji: '🐟', word: 'דג', letter: 'ד' },
+  { emoji: '🌞', word: 'שמש', letter: 'ש' },
+  { emoji: '🌙', word: 'ירח', letter: 'י' },
+  { emoji: '🌳', word: 'עץ', letter: 'ע' },
+  { emoji: '🏠', word: 'בית', letter: 'ב' },
+  { emoji: '🚗', word: 'מכונית', letter: 'מ' },
+  { emoji: '📚', word: 'ספר', letter: 'ס' },
+  { emoji: '🖊️', word: 'עט', letter: 'ע' },
+  { emoji: '👶', word: 'ילד', letter: 'י' },
+  { emoji: '👩', word: 'אמא', letter: 'א' },
+  { emoji: '👨', word: 'אבא', letter: 'א' },
+  { emoji: '💧', word: 'מים', letter: 'מ' },
+  { emoji: '🔥', word: 'אש', letter: 'א' },
+  { emoji: '⭐', word: 'כוכב', letter: 'כ' },
+  { emoji: '🌸', word: 'פרח', letter: 'פ' },
+  { emoji: '🍋', word: 'לימון', letter: 'ל' }
+];
+
+let pictureIndex = 0;
+let pictureScore = 0;
+let pictureActive = false;
+let currentPicture = null;
+
+function startPictureGame() {
+  pictureIndex = 0;
+  pictureScore = 0;
+  pictureActive = true;
+  document.getElementById('pictureScore').textContent = `ניקוד: ${pictureScore}`;
+  nextPicture();
+}
+
+function nextPicture() {
+  if (!pictureActive) return;
+  if (pictureIndex >= pictureItems.length) {
+    document.getElementById('pictureWord').textContent = 'סיימת את כל התמונות! כל הכבוד!';
+    pictureActive = false;
+    return;
+  }
+  currentPicture = pictureItems[pictureIndex];
+  document.getElementById('pictureDisplay').textContent = currentPicture.emoji;
+  document.getElementById('pictureWord').textContent = currentPicture.word;
+  renderPictureOptions();
+  pictureIndex++;
+}
+
+function renderPictureOptions() {
+  const grid = document.getElementById('pictureOptions');
+  grid.innerHTML = '';
+  // Correct letter + 3 random wrong ones
+  const options = [currentPicture.letter];
+  const otherLetters = letters.map(l => l.letter).filter(l => l !== currentPicture.letter);
+  while (options.length < 4) {
+    const rand = otherLetters[Math.floor(Math.random() * otherLetters.length)];
+    if (!options.includes(rand)) options.push(rand);
+  }
+  options.sort(() => Math.random() - 0.5);
+  options.forEach(letter => {
+    const card = document.createElement('div');
+    card.className = 'listen-card';
+    card.innerHTML = `<span class="${getLetterClass()}">${letter}</span>`;
+    card.onclick = () => checkPictureAnswer(card, letter);
+    grid.appendChild(card);
+  });
+}
+
+function checkPictureAnswer(card, letter) {
+  if (!pictureActive) return;
+  const cards = document.querySelectorAll('#pictureOptions .listen-card');
+  cards.forEach(c => c.style.pointerEvents = 'none');
+  if (letter === currentPicture.letter) {
+    card.classList.add('correct');
+    pictureScore += 10;
+    document.getElementById('pictureScore').textContent = `ניקוד: ${pictureScore}`;
+    speak('נכון');
+    setTimeout(() => nextPicture(), 1200);
+  } else {
+    card.classList.add('wrong');
+    speak('לא נכון');
+    setTimeout(() => {
+      cards.forEach(c => {
+        c.classList.remove('wrong');
+        c.style.pointerEvents = 'auto';
+      });
+    }, 900);
   }
 }
 
