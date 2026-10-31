@@ -193,7 +193,7 @@
       <button class="secondary" onclick="nextPicture()">תמונה הבאה</button>
     </div>
     <div class="status">
-      <div class="current-sound" id="pictureWord">לחץ על "התחל משחק תמונות"</div>
+      <div class="current-sound" id="pictureWord">לחץ על "התחל משחק תמונות" — המילה תושמע</div>
       <div class="score" id="pictureScore">ניקוד: 0</div>
     </div>
     <div id="pictureDisplay" style="font-size: 8em; text-align: center; margin: 20px 0;">🍎</div>
@@ -555,10 +555,17 @@ function nextPicture() {
     pictureActive = false;
     return;
   }
+  // Clear previous marks
+  document.querySelectorAll('#pictureOptions .listen-card').forEach(c => {
+    c.classList.remove('correct', 'wrong');
+    c.style.pointerEvents = 'auto';
+  });
   currentPicture = pictureItems[pictureIndex];
   document.getElementById('pictureDisplay').textContent = currentPicture.emoji;
-  document.getElementById('pictureWord').textContent = currentPicture.word;
+  document.getElementById('pictureWord').textContent = ''; // no text, only speech
   renderPictureOptions();
+  // Speak the word
+  setTimeout(() => speak(currentPicture.word), 300);
   pictureIndex++;
 }
 
